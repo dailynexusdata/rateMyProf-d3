@@ -6,17 +6,19 @@ import './styles.scss';
 import { csv, json } from 'd3-fetch';
 import makeBarPlots from './plots/barplots';
 import makeLineCharts from './plots/linecharts';
+import makeFrequencyPlot from './plots/frequencyPlots';
 
 // import plot functions here:
 // import makePLOT_NAME from "./PLOT_NAME";
 
 const main = async () => {
-  const linesData = await d3.csv('dist/data/lines.csv');
-  const barplotsData = await d3.csv('dist/data/barplots.csv');
-
+  const linesData = await csv('dist/data/lines.csv');
+  const barplotsData = await csv('dist/data/barchart.csv');
+  const frequencyData = await csv('dist/data/textcounts.csv');
   const resize = () => {
     makeBarPlots(barplotsData);
     makeLineCharts(linesData);
+    makeFrequencyPlot(frequencyData);
   };
 
   window.addEventListener('resize', () => {

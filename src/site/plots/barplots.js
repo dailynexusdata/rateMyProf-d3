@@ -26,7 +26,6 @@ const makeBarPlots = (data) => {
   container.selectAll('*').remove();
 
   container.append('h1').text('My title');
-
   const size = {
     height: 400,
     width: Math.min(600, window.innerWidth - 40),
