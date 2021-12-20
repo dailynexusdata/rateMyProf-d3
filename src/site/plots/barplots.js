@@ -20,7 +20,7 @@ const makeBarPlots = (data) => {
   */
 
   // The class is necessary to apply styling
-  const container = select('#rate-my-prof-div-id').attr('class', 'rate-my-prof');
+  const container = select('#rate-my-prof-bar-id').attr('class', 'rate-my-prof');
 
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
