@@ -27,7 +27,7 @@ const makeBarPlots = (data) => {
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
-  container.append('h1').text('My title2');
+  container.append('h1').text('Bar Plot');
   const size = {
     height: 400,
     width: Math.min(600, window.innerWidth - 40),
@@ -54,29 +54,43 @@ const makeBarPlots = (data) => {
     Create Scales:
   */
 
-  const x = scaleBand()
-    .domain(data.map((dataPoint) => dataPoint.word))
-    .range([margin.left, size.width - margin.right])
-    .paddingInner(0.1);
-
-  const y = scaleLinear()
+  const x = scaleLinear()
     .domain([0, 11000])
-    .range([size.height - margin.bottom, margin.top]);
+    .range(([margin.left, size.width - margin.right]));
+
+  const y = scaleBand()
+    .domain(data.map((dataPoint) => dataPoint.word))
+    .range([size.height - margin.bottom, margin.top])
+    .padding(0.1);
 
   /*
     Start Plot:
   */
+  // spliting data
+  const positiveData = [];
+  const negativeData = [];
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].sentiment === 'positive') {
+      positiveData.push(data[i]);
+    }
+    else {
+      negativeData.push(data[i]);
+    }
+  }
+
+  console.log([positiveData, negativeData]);
+
   const bars = svg
     .selectAll('.bar')
     .data(data)
     .enter()
     .append('rect')
     .classed('bar', true)
-    .attr('width', x.bandwidth())
-    .attr('height', (data) => size.height - y(data.n))
-    .attr('x', (data) => x(data.word))
-    .attr('y', (data) => y(data.n))
-    .style('fill', '#69b3a2');
+    .attr('width', (data) => x(data.n))
+    .attr('height', y.bandwidth())
+    .attr('x', margin.left)
+    .attr('y', (data) => y(data.word))
+    .style('fill', '#69b3a2')
+    .text((dataPoint) => dataPoint.name);
 };
-
 export default makeBarPlots;
