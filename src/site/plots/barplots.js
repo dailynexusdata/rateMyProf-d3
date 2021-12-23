@@ -54,19 +54,7 @@ const makeBarPlots = (data) => {
     Create Scales:
   */
 
-  const x = scaleLinear()
-    .domain([0, 11000])
-    .range(([margin.left, size.width - margin.right]));
-
-  const y = scaleBand()
-    .domain(data.map((dataPoint) => dataPoint.word))
-    .range([size.height - margin.bottom, margin.top])
-    .padding(0.1);
-
-  /*
-    Start Plot:
-  */
-  // spliting data
+  // split data
   const positiveData = [];
   const negativeData = [];
   for (let i = 0; i < data.length; i++) {
@@ -78,19 +66,54 @@ const makeBarPlots = (data) => {
     }
   }
 
-  console.log([positiveData, negativeData]);
+  const posX = scaleLinear()
+    .domain([0, 11000])
+    .range([margin.left, (size.width / 2)]);
 
-  const bars = svg
-    .selectAll('.bar')
-    .data(data)
+  const posY = scaleBand()
+    .domain(positiveData.map((dataPoint) => dataPoint.word))
+    .range([size.height - margin.bottom, margin.top])
+    .padding(0.1);
+
+  const negX = scaleLinear()
+    .domain([0, 11000])
+    .range([(size.width / 2), size.width - margin.right]);
+
+  const negY = scaleBand()
+    .domain(negativeData.map((dataPoint) => dataPoint.word))
+    .range([size.height - margin.bottom, margin.top])
+    .padding(0.1);
+
+  /*
+    Start Plot:
+  */
+
+  const colors = {
+    blue: '#4e79a7',
+    red: '#e15759',
+  };
+  const posBars = svg
+    .selectAll('.pos-bar')
+    .data(positiveData)
     .enter()
     .append('rect')
-    .classed('bar', true)
-    .attr('width', (data) => x(data.n))
-    .attr('height', y.bandwidth())
+    .classed('pos-bar', true)
+    .attr('width', (data) => posX(data.n))
+    .attr('height', posY.bandwidth())
     .attr('x', margin.left)
-    .attr('y', (data) => y(data.word))
-    .style('fill', '#69b3a2')
-    .text((dataPoint) => dataPoint.name);
+    .attr('y', (data) => posY(data.word))
+    .style('fill', colors.blue);
+
+  const negBars = svg
+    .selectAll('.neg-bar')
+    .data(negativeData)
+    .enter()
+    .append('rect')
+    .classed('neg-bar', true)
+    .attr('width', (data) => negX(data.n))
+    .attr('height', negY.bandwidth())
+    .attr('x', size.width / 2)
+    .attr('y', (data) => negY(data.word))
+    .style('fill', colors.red);
 };
 export default makeBarPlots;
