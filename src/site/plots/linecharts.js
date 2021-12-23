@@ -5,7 +5,7 @@
  *
  */
 import { select } from 'd3-selection';
-import { scaleLinear } from 'd3-scale';
+import { scaleBand, scaleLinear } from 'd3-scale';
 
 /**
  * @param {*} data - What is the data?
@@ -14,18 +14,26 @@ import { scaleLinear } from 'd3-scale';
  *
  * @since Date
  */
+
+function onlyUnique(value, index, self) {
+  return self.indexOf(value) === index;
+}
+
 const makeLineCharts = (data) => {
   /*
     Container Setup:
   */
 
   // The class is necessary to apply styling
-  const container = select('#rate-my-prof-div-id').attr('class', 'rate-my-prof');
-
+  const container = select('#rate-my-prof-line-plot').attr(
+    'class',
+    'rate-my-prof',
+  );
+  console.log(data);
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
-  container.append('h1').text('My title');
+  container.append('h1').text('Line title');
 
   const size = {
     height: 400,
@@ -44,26 +52,26 @@ const makeLineCharts = (data) => {
     .attr('height', size.height)
     .attr('width', size.width);
 
-  container
-    .append('a')
-    .text('Source: __________')
-    .attr('href', '');
+  container.append('a').text('Source: __________').attr('href', '');
 
   /*
     Create Scales:
   */
-
-  const x = scaleLinear()
-    .domain([0, 1])
+  const uniqueYears = data.map((d) => d.year).filter(onlyUnique);
+  console.log(uniqueYears);
+  const x = scaleBand()
+    .domain(uniqueYears)
     .range([margin.left, size.width - margin.right]);
 
   const y = scaleLinear()
-    .domain([0, 1])
+    .domain([1, 5])
     .range([size.height - margin.bottom, margin.top]);
 
   /*
     Start Plot:
   */
+
+    
 };
 
 export default makeLineCharts;
