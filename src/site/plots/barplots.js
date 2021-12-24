@@ -66,7 +66,7 @@ const makeBarPlots = (data) => {
     }
   }
 
-  const posX = scaleLinear()
+  const x = scaleLinear()
     .domain([0, 11000])
     .range([margin.left, (size.width / 2)]);
 
@@ -74,10 +74,6 @@ const makeBarPlots = (data) => {
     .domain(positiveData.map((dataPoint) => dataPoint.word))
     .range([size.height - margin.bottom, margin.top])
     .padding(0.1);
-
-  const negX = scaleLinear()
-    .domain([0, 11000])
-    .range([(size.width / 2), size.width - margin.right]);
 
   const negY = scaleBand()
     .domain(negativeData.map((dataPoint) => dataPoint.word))
@@ -98,11 +94,20 @@ const makeBarPlots = (data) => {
     .enter()
     .append('rect')
     .classed('pos-bar', true)
-    .attr('width', (data) => posX(data.n))
+    .attr('width', (data) => x(data.n))
     .attr('height', posY.bandwidth())
     .attr('x', margin.left)
     .attr('y', (data) => posY(data.word))
     .style('fill', colors.blue);
+
+  const posText = svg
+    .selectAll('labels')
+    .data(positiveData)
+    .enter()
+    .append('text')
+    .text((d) => d.word)
+    .attr('x', margin.left)
+    .attr('y', (d) => posY(d.word) + 20);
 
   const negBars = svg
     .selectAll('.neg-bar')
@@ -110,10 +115,19 @@ const makeBarPlots = (data) => {
     .enter()
     .append('rect')
     .classed('neg-bar', true)
-    .attr('width', (data) => negX(data.n))
+    .attr('width', (data) => x(data.n))
     .attr('height', negY.bandwidth())
     .attr('x', size.width / 2)
     .attr('y', (data) => negY(data.word))
     .style('fill', colors.red);
+
+  const negText = svg
+    .selectAll('labels')
+    .data(negativeData)
+    .enter()
+    .append('text')
+    .text((d) => d.word)
+    .attr('x', size.width / 2)
+    .attr('y', (d) => negY(d.word) + 20);
 };
 export default makeBarPlots;
