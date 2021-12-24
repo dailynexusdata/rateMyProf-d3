@@ -6,6 +6,8 @@
  */
 import { select } from 'd3-selection';
 import { scaleBand, scaleLinear } from 'd3-scale';
+import { axisBottom } from 'd3-axis';
+import { selectAll } from 'd3-selection';
 
 /**
  * @param {*} data - What is the data?
@@ -36,7 +38,7 @@ const makeBarPlots = (data) => {
   const margin = {
     top: 10,
     right: 10,
-    bottom: 10,
+    bottom: 20,
     left: 10,
   };
 
@@ -98,7 +100,18 @@ const makeBarPlots = (data) => {
     .attr('height', posY.bandwidth())
     .attr('x', margin.left)
     .attr('y', (data) => posY(data.word))
-    .style('fill', colors.blue);
+    .style('fill', colors.blue)
+    .on('mouseenter', (event, d) => {
+      svg
+        .append('text')
+        .attr('x', x(d.n) / 2)
+        .attr('y', posY(d.word) + 20)
+        .text(`n = ${d.n}`)
+        .attr('class', 'hover-over-text');
+    })
+    .on('mouseleave', () => {
+      selectAll('.hover-over-text').remove();
+    });
 
   const posText = svg
     .selectAll('labels')
@@ -107,7 +120,8 @@ const makeBarPlots = (data) => {
     .append('text')
     .text((d) => d.word)
     .attr('x', margin.left)
-    .attr('y', (d) => posY(d.word) + 20);
+    .attr('y', (d) => posY(d.word) + 20)
+    .attr('class', 'positive-text');
 
   const negBars = svg
     .selectAll('.neg-bar')
@@ -117,7 +131,7 @@ const makeBarPlots = (data) => {
     .classed('neg-bar', true)
     .attr('width', (data) => x(data.n))
     .attr('height', negY.bandwidth())
-    .attr('x', size.width / 2)
+    .attr('x', (size.width / 2) + 10)
     .attr('y', (data) => negY(data.word))
     .style('fill', colors.red);
 
@@ -127,7 +141,27 @@ const makeBarPlots = (data) => {
     .enter()
     .append('text')
     .text((d) => d.word)
-    .attr('x', size.width / 2)
+    .attr('x', (size.width / 2) + 10)
     .attr('y', (d) => negY(d.word) + 20);
+
+  svg
+    .append('g')
+    .attr('transform', `translate(0, ${size.height - margin.bottom})`)
+    .attr('color', '#adadad')
+    .call(
+      axisBottom(x)
+        .ticks(4)
+        .tickFormat((d) => d),
+    );
+
+  svg
+    .append('g')
+    .attr('transform', `translate(${size.width / 2}, ${size.height - margin.bottom})`)
+    .attr('color', '#adadad')
+    .call(
+      axisBottom(x)
+        .ticks(4)
+        .tickFormat((d) => d),
+    );
 };
 export default makeBarPlots;
