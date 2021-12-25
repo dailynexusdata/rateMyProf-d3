@@ -15,6 +15,11 @@ import { min, max } from 'd3-array';
  *
  * @since 11/29/2021
  */
+
+const randomJitter = (coord) => {
+  const rangeList = Array(20).fill(-10).map((x, y) => x + y);
+  return coord + rangeList[Math.floor(Math.random() * 19)];
+};
 const makeFrequencyPlot = (data) => {
   /*
     Container Setup:
@@ -59,16 +64,11 @@ const makeFrequencyPlot = (data) => {
       // console.log(s.options[s.selectedIndex].text);
       firstSelectIndex = document
         .getElementById('first-option-frequency-selector').selectedIndex;
+      console.log(firstSelectIndex);
       secondSelectIndex = document
         .getElementById('second-option-frequency-selector').selectedIndex;
+      makePlot();
     });
-
-  const firstDept = depts[firstSelectIndex];
-  const secondDept = depts[secondSelectIndex];
-  const plotData = data
-    .map((d) => [d.word, parseFloat(d[firstDept]), parseFloat(d[secondDept])])
-    .filter((d) => !isNaN(d[1]) && !isNaN(d[2]));
-  console.log(plotData[1]);
 
   const size = {
     height: 400,
@@ -95,39 +95,49 @@ const makeFrequencyPlot = (data) => {
   /*
     Create Scales:
   */
-  const maxX = max(plotData.map((d) => d[1]));
-  const minX = min(plotData.map((d) => d[1]));
-  const maxY = max(plotData.map((d) => d[2]));
-  const minY = min(plotData.map((d) => d[2]));
+  const makePlot = () => {
+    svg.selectAll('*').remove();
+    const firstDept = depts[firstSelectIndex];
+    const secondDept = depts[secondSelectIndex];
+    const plotData = data
+      .map((d) => [d.word, parseFloat(d[firstDept]), parseFloat(d[secondDept])])
+      .filter((d) => !isNaN(d[1]) && !isNaN(d[2]));
+    const maxX = max(plotData.map((d) => d[1]));
+    const minX = min(plotData.map((d) => d[1]));
+    const maxY = max(plotData.map((d) => d[2]));
+    const minY = min(plotData.map((d) => d[2]));
 
-  const x = scaleLog()
-    .domain([minX, maxX])
-    .range([margin.left, size.width - margin.right]);
+    const x = scaleLog()
+      .domain([minX, maxX])
+      .range([margin.left, size.width - margin.right]);
 
-  const y = scaleLog()
-    .domain([minY, maxY])
-    .range([size.height - margin.bottom, margin.top]);
-  /*
-    Start Plot:
-  */
-  console.log(x(1));
-  const circleGroup = svg.append('g')
-    .selectAll('dot')
-    .data(plotData)
-    .enter()
-    .append('g');
-  circleGroup
-    .append('circle')
-    .attr('cx', (d) => x(d[1]))
-    .attr('cy', (d) => y(d[2]))
-    .attr('r', 3)
-    .style('fill', '#69b3a2');
-  circleGroup
-    .data((plotData.filter((d, i) => i % 5 === 0)))
-    .append('text')
-    .attr('x', (d) => x(d[1]))
-    .attr('y', (d) => y(d[2]))
-    .text((d) => d[0]);
+    const y = scaleLog()
+      .domain([minY, maxY])
+      .range([size.height - margin.bottom, margin.top]);
+    /*
+      Start Plot:
+    */
+    console.log(x(1));
+    const circleGroup = svg.append('g')
+      .selectAll('dot')
+      .data(plotData)
+      .enter()
+      .append('g');
+    const circles = circleGroup
+      .append('circle')
+      .attr('cx', (d) => randomJitter(x(d[1])))
+      .attr('cy', (d) => randomJitter(y(d[2])))
+      .attr('r', 5)
+      .style('fill', '#69b3a2')
+      .style('opacity', '0.3  ');
+
+    circleGroup
+      .data((plotData.filter((d, i) => i % 5 === 0)))
+      .append('text')
+      .attr('x', (d) => x(d[1]))
+      .attr('y', (d) => y(d[2]))
+      .text((d) => d[0]);
+  };
 };
 
 export default makeFrequencyPlot;
