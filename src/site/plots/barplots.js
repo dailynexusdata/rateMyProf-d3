@@ -4,10 +4,9 @@
  * @author Jordan Russo
  *
  */
-import { select } from 'd3-selection';
+import { select, selectAll } from 'd3-selection';
 import { scaleBand, scaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
-import { selectAll } from 'd3-selection';
 
 /**
  * @param {*} data - What is the data?
@@ -36,11 +35,11 @@ const makeBarPlots = (data) => {
   };
 
   const margin = {
-    top: 30,
+    top: 50,
     bottom: 20,
     left: 70,
-    midright: (size.width / 2) - 80,
-    midleft: (size.width / 2) + 60,
+    midright: (size.width / 2) - 80, // right margin for left side
+    midleft: (size.width / 2) + 70, // left margin for right side
     right: 10,
   };
 
@@ -141,16 +140,20 @@ const makeBarPlots = (data) => {
       selectAll('.hover-over-text').remove();
     });
 
-  // postive axis
+  /*
+    Define Axes:
+  */
+  // postive horizontal
   svg
     .append('g')
-    .attr('transform', `translate(${margin.left}, ${size.height - margin.bottom})`)
+    .attr('transform', `translate(0, ${size.height - margin.bottom})`)
     .attr('color', 'black')
     .call(
       axisBottom(x)
         .ticks(4),
     );
 
+  // positive vertical
   svg
     .append('g')
     .attr('transform', `translate(${margin.left}, 0)`)
@@ -158,7 +161,7 @@ const makeBarPlots = (data) => {
       axisLeft(posY),
     );
 
-  // negative axis
+  // negative horizontal
   svg
     .append('g')
     .attr('transform', `translate(${margin.midleft}, ${size.height - margin.bottom})`)
@@ -168,6 +171,7 @@ const makeBarPlots = (data) => {
         .ticks(4),
     );
 
+  // negative vertical
   svg
     .append('g')
     .attr('transform', `translate(${margin.midleft}, 0)`)
