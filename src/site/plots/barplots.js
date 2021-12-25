@@ -6,7 +6,7 @@
  */
 import { select } from 'd3-selection';
 import { scaleBand, scaleLinear } from 'd3-scale';
-import { axisBottom } from 'd3-axis';
+import { axisBottom, axisLeft } from 'd3-axis';
 import { selectAll } from 'd3-selection';
 
 /**
@@ -36,11 +36,11 @@ const makeBarPlots = (data) => {
   };
 
   const margin = {
-    top: 10,
+    top: 30,
     bottom: 20,
-    left: 10,
-    midright: (size.width / 2) - 50,
-    midleft: (size.width / 2) + 50,
+    left: 70,
+    midright: (size.width / 2) - 80,
+    midleft: (size.width / 2) + 60,
     right: 10,
   };
 
@@ -117,18 +117,6 @@ const makeBarPlots = (data) => {
       selectAll('.hover-over-text').remove();
     });
 
-  const posText = svg
-    .selectAll('labels')
-    .data(positiveData)
-    .enter()
-    .append('text')
-    .text((d) => d.word)
-    .attr('x', 0)
-    .attr('y', (d) => posY(d.word) + 20)
-    .attr('class', 'positive-text')
-    .style('margin', 'auto')
-    .style('font-size', 'small');
-
   const negBars = svg
     .selectAll('.neg-bar')
     .data(negativeData)
@@ -143,7 +131,7 @@ const makeBarPlots = (data) => {
     .on('mouseenter', (event, d) => {
       svg
         .append('text')
-        .attr('x', margin.midleft)
+        .attr('x', margin.midleft + x(d.n))
         .attr('y', negY(d.word) + 20)
         .text(d.n)
         .attr('class', 'hover-over-text')
@@ -152,17 +140,6 @@ const makeBarPlots = (data) => {
     .on('mouseleave', () => {
       selectAll('.hover-over-text').remove();
     });
-
-  const negText = svg
-    .selectAll('labels')
-    .data(negativeData)
-    .enter()
-    .append('text')
-    .text((d) => d.word)
-    .attr('x', margin.midleft)
-    .attr('y', (d) => negY(d.word) + 20)
-    .attr('class', 'negative-text')
-    .style('font-size', 'small');
 
   // postive axis
   svg
@@ -174,6 +151,13 @@ const makeBarPlots = (data) => {
         .ticks(4),
     );
 
+  svg
+    .append('g')
+    .attr('transform', `translate(${margin.left}, 0)`)
+    .call(
+      axisLeft(posY),
+    );
+
   // negative axis
   svg
     .append('g')
@@ -181,8 +165,14 @@ const makeBarPlots = (data) => {
     .attr('color', 'black')
     .call(
       axisBottom(x)
-        .ticks(4)
-        .tickFormat((d) => d),
+        .ticks(4),
+    );
+
+  svg
+    .append('g')
+    .attr('transform', `translate(${margin.midleft}, 0)`)
+    .call(
+      axisLeft(negY),
     );
 };
 export default makeBarPlots;
