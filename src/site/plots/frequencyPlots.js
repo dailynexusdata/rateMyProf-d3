@@ -125,19 +125,43 @@ const makeFrequencyPlot = (data) => {
       .append('g');
     const circles = circleGroup
       .append('circle')
-      .attr('cx', (d) => randomJitter(x(d[1])))
-      .attr('cy', (d) => randomJitter(y(d[2])))
+      .attr('cx', (d) => {
+        const jitterPointX = randomJitter(x(d[1]));
+        return (jitterPointX < margin.right) ? x(d[1]) : jitterPointX;
+      })
+      .attr('cy', (d) => {
+        const jitterPointY = randomJitter(y(d[2]));
+        return (jitterPointY < margin.bottom) ? x(d[1]) : jitterPointY;
+      })
       .attr('r', 5)
       .style('fill', '#69b3a2')
       .style('opacity', '0.3  ');
 
-    circleGroup
+    const circleLabels = circleGroup
       .data((plotData.filter((d, i) => i % 5 === 0)))
       .append('text')
       .attr('x', (d) => x(d[1]))
       .attr('y', (d) => y(d[2]))
       .text((d) => d[0]);
+
+    circleLabels
+      .each(function () {
+        const that = this;
+        const a = this.getBoundingClientRect();
+        console.log(a);
+        circleLabels
+          .each(function () {
+            if (this !== that) {
+              const b = this.getBoundingClientRect();
+              if ((Math.abs(a.x - b.x) * 2 < (a.width + b.width))
+                   && (Math.abs(a.y - b.y) * 2 < (a.height + b.height))) {
+                select(this).text('');
+              }
+            }
+          });
+      });
   };
+  makePlot();
 };
 
 export default makeFrequencyPlot;
