@@ -118,6 +118,15 @@ const makeFrequencyPlot = (data) => {
       Start Plot:
     */
     console.log(x(1));
+    svg.append('line')
+      .attr('x1', x(minX))
+      .attr('x2', x(maxX))
+      .attr('y1', y(minY))
+      .attr('y2', y(maxY))
+      .attr('stroke-width', 1)
+      .attr('stroke', 'gray')
+      .attr('stroke-dasharray', '5,5');
+
     const circleGroup = svg.append('g')
       .selectAll('dot')
       .data(plotData)
@@ -135,14 +144,18 @@ const makeFrequencyPlot = (data) => {
       })
       .attr('r', 5)
       .style('fill', '#69b3a2')
-      .style('opacity', '0.3  ');
+      .style('opacity', '0.15  ');
 
     const circleLabels = circleGroup
       .data((plotData.filter((d, i) => i % 5 === 0)))
       .append('text')
       .attr('x', (d) => x(d[1]))
       .attr('y', (d) => y(d[2]))
-      .text((d) => d[0]);
+      .text((d) => d[0])
+      .style('font-family', 'Arial, Helvetica, sans-serif')
+      .style('color', '#b5b5b5')
+      .style('font-size', '14px')
+      .style('opacity', '0.6');
 
     circleLabels
       .each(function () {
@@ -153,9 +166,9 @@ const makeFrequencyPlot = (data) => {
           .each(function () {
             if (this !== that) {
               const b = this.getBoundingClientRect();
-              if ((Math.abs(a.x - b.x) * 2 < (a.width + b.width))
-                   && (Math.abs(a.y - b.y) * 2 < (a.height + b.height))) {
-                select(this).text('');
+              if ((Math.abs(a.right - b.right) < (a.width + b.width))
+                   && (Math.abs(a.top - b.top) < (a.height + b.height))) {
+                this.remove();
               }
             }
           });
