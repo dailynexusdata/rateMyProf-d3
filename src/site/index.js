@@ -4,7 +4,7 @@
  */
 import './styles.scss';
 import { csv, json } from 'd3-fetch';
-import makeBarPlots from './plots/newbarplot';
+import makeBarPlots from './plots/barplots';
 import makeLineCharts from './plots/linecharts';
 import makeFrequencyPlot from './plots/frequencyPlots';
 
