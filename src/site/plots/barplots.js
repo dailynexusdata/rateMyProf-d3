@@ -71,7 +71,7 @@ const makeSinglePlot = (div, d, title, color, yMax) => {
   */
   const xAxis = svg
     .append('g')
-    .attr('transform', `translate(${margin.left}, ${size.height - margin.bottom})`)
+    .attr('transform', `translate(0, ${size.height - margin.bottom})`)
     .attr('color', 'black')
     .call(
       axisBottom(x)
