@@ -84,6 +84,7 @@ const makeBarPlots = (data) => {
     .style('display', 'grid')
     .style('grid-template-columns', '1fr 1fr');
 
+  console.log(data);
   container.selectAll('*').remove();
   const posData = data.filter((d) => d.sentiment === 'positive');
   const negData = data.filter((d) => d.sentiment === 'negative');
