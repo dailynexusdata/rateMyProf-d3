@@ -92,8 +92,7 @@ const makeBarPlots = (data) => {
 
   const x = scaleLinear()
     .domain([0, 15000])
-    .range([margin.left, (size.width / 2) - margin.right]);
-
+    .range([margin.left, size.width / 2 - margin.right]);
   const posY = scaleBand()
     .domain(positiveData.map((dataPoint) => dataPoint.word))
     .range([size.height - margin.bottom, margin.top])
