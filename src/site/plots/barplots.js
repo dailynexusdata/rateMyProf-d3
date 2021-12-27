@@ -29,7 +29,7 @@ const makeSinglePlot = (div, d, title, color, yMax) => {
   };
   const margin = {
     top: 35,
-    left: 20,
+    left: 70,
     bottom: 30,
     right: 20,
   };
@@ -76,6 +76,14 @@ const makeSinglePlot = (div, d, title, color, yMax) => {
     .call(
       axisBottom(x)
         .ticks(4),
+    );
+
+  const yAxis = svg
+    .append('g')
+    .attr('transform', `translate(${margin.left}, 0)`)
+    .attr('color', 'black')
+    .call(
+      axisLeft(y),
     );
 };
 const makeBarPlots = (data) => {
