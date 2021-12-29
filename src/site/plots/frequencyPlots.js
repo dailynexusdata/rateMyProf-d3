@@ -22,12 +22,19 @@ const randomJitter = (coord) =>
   // I'm not sure if you want it to be an integer, you could remove the last math.round
   coord + Math.round(20 * (Math.random() - 0.5));
 
+const buttonClick = () => {
+  firstSelectIndex = document
+        .getElementById('first-option-frequency-selector').selectedIndex;
+      secondSelectIndex = document
+        .getElementById('second-option-frequency-selector').selectedIndex;
+      makePlot();
+}
 const makeFrequencyPlot = (data) => {
   /*
     Container Setup:
   */
 
-  console.log(data);
+
   // The class is necessary to apply styling
   const container = select('#rate-my-prof-frequency-plot').attr(
     'class',
@@ -62,7 +69,7 @@ const makeFrequencyPlot = (data) => {
     .attr('dept', 'dept-list')
     .attr('id', 'first-option-frequency-selector')
     .on('change', buttonClick);
-
+  
   const firstOptions = firstSelector
     .selectAll('option')
     .data(depts)
@@ -93,6 +100,7 @@ const makeFrequencyPlot = (data) => {
       // const s = firstSelector[0];
       // console.log(s.options[s.selectedIndex].text);
       buttonClick();
+
     });
 
   const size = {
@@ -142,6 +150,7 @@ const makeFrequencyPlot = (data) => {
     console.log(x(1));
     svg
       .append('line')
+
       .attr('x1', x(minX))
       .attr('x2', x(maxX))
       .attr('y1', y(minY))
@@ -209,6 +218,7 @@ const makeFrequencyPlot = (data) => {
             this.remove();
           }
         }
+
       });
     });
   };
