@@ -25,7 +25,7 @@ const makeFrequencyPlot = (data) => {
     Container Setup:
   */
 
-  console.log(data);
+
   // The class is necessary to apply styling
   const container = select('#rate-my-prof-frequency-plot')
     .attr('class', 'rate-my-prof-frequency');
@@ -64,7 +64,6 @@ const makeFrequencyPlot = (data) => {
       // console.log(s.options[s.selectedIndex].text);
       firstSelectIndex = document
         .getElementById('first-option-frequency-selector').selectedIndex;
-      console.log(firstSelectIndex);
       secondSelectIndex = document
         .getElementById('second-option-frequency-selector').selectedIndex;
       makePlot();
@@ -117,7 +116,6 @@ const makeFrequencyPlot = (data) => {
     /*
       Start Plot:
     */
-    console.log(x(1));
     svg.append('line')
       .attr('x1', x(minX))
       .attr('x2', x(maxX))
@@ -161,7 +159,6 @@ const makeFrequencyPlot = (data) => {
       .each(function () {
         const that = this;
         const a = this.getBoundingClientRect();
-        console.log(a);
         circleLabels
           .each(function () {
             if (this !== that) {
