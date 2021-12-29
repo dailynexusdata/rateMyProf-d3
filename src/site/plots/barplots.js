@@ -86,7 +86,7 @@ const makeSinglePlot = (div, d, title, color) => {
     .transition()
     .duration(800)
     .attr('x', margin.left)
-    .attr('width', (d) => x(d.n))
+    .attr('width', (d) => x(d.n) - x(0))
     .delay((d, i) => i * 100);
 
   /*
