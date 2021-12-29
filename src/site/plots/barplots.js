@@ -7,6 +7,7 @@
 import { select, selectAll } from 'd3-selection';
 import { scaleBand, scaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
+import { max } from 'd3-array';
 import { transition } from 'd3-transition';
 
 /**
@@ -19,14 +20,15 @@ import { transition } from 'd3-transition';
  * @param title {string} - Title for each plot
  * @param color {string} - Color each plot
  * @param xMax {number} - max range for x axis of each plot
-*/
-const makeSinglePlot = (div, d, title, color) => {
+ */
+const makeSinglePlot = (div, d, title, color, xMax) => {
+
   /*
     Container Setup:
   */
   const size = {
     height: 400,
-    width: (Math.min(600, window.innerWidth - 40)) / 2,
+    width: Math.min(600, window.innerWidth - 40) / 2,
   };
   const margin = {
     top: 35,
@@ -44,7 +46,7 @@ const makeSinglePlot = (div, d, title, color) => {
     Create Scales:
   */
   const x = scaleLinear()
-    .domain([0, 15000])
+    .domain([0, xMax])
     .range([margin.left, size.width - margin.right]);
 
   const y = scaleBand()
@@ -56,12 +58,13 @@ const makeSinglePlot = (div, d, title, color) => {
     Start Plot:
   */
   const bars = svg
-    .selectAll('.bars')
+    .selectAll('.rate-my-prof-bars')
     .data(d)
     .enter()
     .append('rect')
-    .attr('class', 'bars')
-    .attr('width', 0)
+    .attr('class', 'rate-my-prof-bars')
+    // for the width of the bar you'll typically have to subtract the starting point:
+    .attr('width', (d) => x(d.n) - x(0))
     .attr('height', (d) => y.bandwidth())
     .attr('x', margin.left)
     .attr('y', (d) => y(d.word))
@@ -96,18 +99,13 @@ const makeSinglePlot = (div, d, title, color) => {
     .append('g')
     .attr('transform', `translate(0, ${size.height - margin.bottom})`)
     .attr('color', 'black')
-    .call(
-      axisBottom(x)
-        .ticks(4),
-    );
+    .call(axisBottom(x).ticks(4));
 
   const yAxis = svg
     .append('g')
     .attr('transform', `translate(${margin.left}, 0)`)
     .attr('color', 'black')
-    .call(
-      axisLeft(y),
-    );
+    .call(axisLeft(y));
 };
 
 const makeBarPlots = (data) => {
@@ -122,11 +120,13 @@ const makeBarPlots = (data) => {
   const posData = data.filter((d) => d.sentiment === 'positive');
   const negData = data.filter((d) => d.sentiment === 'negative');
 
+  const xMax = max(data, (d) => d.n);
+
   const posDiv = container.append('div');
-  makeSinglePlot(posDiv, posData, 'Positive Sentiments', '#4e79a7');
+  makeSinglePlot(posDiv, posData, 'Positive Sentiments', '#4e79a7', xMax);
 
   const negDiv = container.append('div');
-  makeSinglePlot(negDiv, negData, 'Negative Sentiments', '#e15759');
+  makeSinglePlot(negDiv, negData, 'Negative Sentiments', '#e15759', xMax);
 };
 
 export default makeBarPlots;
