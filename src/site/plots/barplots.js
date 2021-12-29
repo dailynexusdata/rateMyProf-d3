@@ -7,6 +7,7 @@
 import { select, selectAll } from 'd3-selection';
 import { scaleBand, scaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
+import { transition } from 'd3-transition';
 
 /**
  * @author Jordan Russo
@@ -19,7 +20,7 @@ import { axisBottom, axisLeft } from 'd3-axis';
  * @param color {string} - Color each plot
  * @param xMax {number} - max range for x axis of each plot
 */
-const makeSinglePlot = (div, d, title, color, yMax) => {
+const makeSinglePlot = (div, d, title, color) => {
   /*
     Container Setup:
   */
@@ -31,7 +32,7 @@ const makeSinglePlot = (div, d, title, color, yMax) => {
     top: 35,
     left: 70,
     bottom: 30,
-    right: 20,
+    right: 30,
   };
   const svg = div
     .append('svg')
@@ -60,11 +61,33 @@ const makeSinglePlot = (div, d, title, color, yMax) => {
     .enter()
     .append('rect')
     .attr('class', 'bars')
-    .attr('width', (d) => x(d.n))
+    .attr('width', 0)
     .attr('height', (d) => y.bandwidth())
     .attr('x', margin.left)
     .attr('y', (d) => y(d.word))
-    .style('fill', color);
+    .style('fill', color)
+    .on('mouseenter', (event, d) => {
+      svg
+        .append('text')
+        .attr('x', margin.left + x(d.n))
+        .attr('y', y(d.word) + 20)
+        .text(d.n)
+        .attr('class', 'hover-over-text')
+        .style('font-size', 'small');
+    })
+    .on('mouseleave', () => {
+      selectAll('.hover-over-text').remove();
+    });
+
+  /*
+    Animation:
+  */
+  svg.selectAll('rect')
+    .transition()
+    .duration(800)
+    .attr('x', margin.left)
+    .attr('width', (d) => x(d.n))
+    .delay((d, i) => i * 100);
 
   /*
     Define Axes:
@@ -86,6 +109,7 @@ const makeSinglePlot = (div, d, title, color, yMax) => {
       axisLeft(y),
     );
 };
+
 const makeBarPlots = (data) => {
   const container = select('#rate-my-prof-bar-plot')
     .attr('class', 'rate-my-prof')
@@ -94,6 +118,7 @@ const makeBarPlots = (data) => {
 
   console.log(data);
   container.selectAll('*').remove();
+
   const posData = data.filter((d) => d.sentiment === 'positive');
   const negData = data.filter((d) => d.sentiment === 'negative');
 
