@@ -22,7 +22,6 @@ import { transition } from 'd3-transition';
  * @param xMax {number} - max range for x axis of each plot
  */
 const makeSinglePlot = (div, d, title, color, xMax) => {
-
   /*
     Container Setup:
   */
@@ -57,6 +56,7 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
   /*
     Start Plot:
   */
+
   const bars = svg
     .selectAll('.rate-my-prof-bars')
     .data(d)
@@ -64,7 +64,7 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
     .append('rect')
     .attr('class', 'rate-my-prof-bars')
     // for the width of the bar you'll typically have to subtract the starting point:
-    .attr('width', (d) => x(d.n) - x(0))
+    .attr('width', (d) => 0)
     .attr('height', (d) => y.bandwidth())
     .attr('x', margin.left)
     .attr('y', (d) => y(d.word))
@@ -114,13 +114,14 @@ const makeBarPlots = (data) => {
     .style('display', 'grid')
     .style('grid-template-columns', '1fr 1fr');
 
-  console.log(data);
   container.selectAll('*').remove();
 
   const posData = data.filter((d) => d.sentiment === 'positive');
   const negData = data.filter((d) => d.sentiment === 'negative');
 
-  const xMax = max(data, (d) => d.n);
+  const xMax = max(data.map((d) => parseInt(d.n)));
+
+  // const xMax = max(data, (d) => d.n);
 
   const posDiv = container.append('div');
   makeSinglePlot(posDiv, posData, 'Positive Sentiments', '#4e79a7', xMax);

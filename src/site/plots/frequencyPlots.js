@@ -24,16 +24,15 @@ const randomJitter = (coord) =>
 
 const buttonClick = () => {
   firstSelectIndex = document
-        .getElementById('first-option-frequency-selector').selectedIndex;
-      secondSelectIndex = document
-        .getElementById('second-option-frequency-selector').selectedIndex;
-      makePlot();
-}
+    .getElementById('first-option-frequency-selector').selectedIndex;
+  secondSelectIndex = document
+    .getElementById('second-option-frequency-selector').selectedIndex;
+  makePlot();
+};
 const makeFrequencyPlot = (data) => {
   /*
     Container Setup:
   */
-
 
   // The class is necessary to apply styling
   const container = select('#rate-my-prof-frequency-plot').attr(
@@ -69,7 +68,7 @@ const makeFrequencyPlot = (data) => {
     .attr('dept', 'dept-list')
     .attr('id', 'first-option-frequency-selector')
     .on('change', buttonClick);
-  
+
   const firstOptions = firstSelector
     .selectAll('option')
     .data(depts)
@@ -91,17 +90,6 @@ const makeFrequencyPlot = (data) => {
     .text((d) => d)
     .attr('value', (d) => d)
     .property('selected', (d) => d === 'Art');
-
-  // I think it would be easier to get rid of the button?
-  const plotButton = container
-    .append('button')
-    .text('Make Plot')
-    .on('click', () => {
-      // const s = firstSelector[0];
-      // console.log(s.options[s.selectedIndex].text);
-      buttonClick();
-
-    });
 
   const size = {
     height: 400,
@@ -218,7 +206,6 @@ const makeFrequencyPlot = (data) => {
             this.remove();
           }
         }
-
       });
     });
   };
