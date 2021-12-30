@@ -31,7 +31,7 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
   };
   const margin = {
     top: 35,
-    left: 70,
+    left: 72,
     bottom: 30,
     right: 30,
   };
@@ -64,15 +64,15 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
     .append('rect')
     .attr('class', 'rate-my-prof-bars')
     // for the width of the bar you'll typically have to subtract the starting point:
-    .attr('width', (d) => 0)
-    .attr('height', (d) => y.bandwidth())
+    .attr('width', 0)
+    .attr('height', y.bandwidth())
     .attr('x', margin.left)
     .attr('y', (d) => y(d.word))
     .style('fill', color)
     .on('mouseenter', (event, d) => {
       svg
         .append('text')
-        .attr('x', margin.left + x(d.n))
+        .attr('x', margin.left + x(d.n) - x(0))
         .attr('y', y(d.word) + 20)
         .text(d.n)
         .attr('class', 'hover-over-text')
@@ -119,7 +119,7 @@ const makeBarPlots = (data) => {
   const posData = data.filter((d) => d.sentiment === 'positive');
   const negData = data.filter((d) => d.sentiment === 'negative');
 
-  const xMax = max(data.map((d) => parseInt(d.n)));
+  const xMax = max(data.map((d) => parseInt(d.n))) + 1000;
 
   // const xMax = max(data, (d) => d.n);
 
