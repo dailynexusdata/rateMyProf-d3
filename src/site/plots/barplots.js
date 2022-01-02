@@ -128,6 +128,8 @@ const makeBarPlots = (data) => {
 
   const negDiv = container.append('div');
   makeSinglePlot(negDiv, negData, 'Negative Sentiments', '#e15759', xMax);
+
+  container.append('a').text('Source: __________').attr('href', '');
 };
 
 export default makeBarPlots;
