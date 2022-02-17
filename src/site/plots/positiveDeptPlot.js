@@ -39,7 +39,7 @@ const makePositiveChart = (data) => {
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
-  container.append('h1').text('My title');
+  container.append('h1').text('Proportion of Words Indicating "Positive Sentiment" by Department, Sorted by Most Reviewed Departments.');
 
   const size = {
     height: 400,
@@ -60,7 +60,7 @@ const makePositiveChart = (data) => {
 
   container
     .append('a')
-    .text('Source: __________')
+    .text('Source: RateMyProfessor.com, Bing Sentiment Lexicon')
     .attr('href', '');
 
   /*
