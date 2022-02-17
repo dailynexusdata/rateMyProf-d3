@@ -29,7 +29,6 @@ const makeLineCharts = (data) => {
     'class',
     'rate-my-prof',
   );
-  console.log(data);
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
@@ -70,8 +69,6 @@ const makeLineCharts = (data) => {
   /*
     Start Plot:
   */
-
-    
 };
 
 export default makeLineCharts;
