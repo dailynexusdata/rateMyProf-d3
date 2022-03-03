@@ -5,8 +5,11 @@
  *
  */
 import { select } from 'd3-selection';
-import { scaleBand, scaleLinear } from 'd3-scale';
-
+import { scaleTime, scaleLinear } from 'd3-scale';
+import { line } from 'd3-shape';
+import { axisBottom, axisLeft } from 'd3-axis';
+import { timeParse } from 'd3-time-format';
+import { extent } from 'd3-array';
 /**
  * @param {*} data - What is the data?
  *
@@ -19,6 +22,75 @@ function onlyUnique(value, index, self) {
   return self.indexOf(value) === index;
 }
 
+const makeSinglePlot = (div, data, title, color) => {
+  /*
+    Container Setup:
+  */
+  const plotData = data.map((d) => ({ year: timeParse('%Y')(d.year), value: parseFloat(d.value) }));
+  const size = {
+    height: 400,
+    width: Math.min(600, window.innerWidth - 40),
+  };
+  const margin = {
+    top: 35,
+    left: 72,
+    bottom: 70,
+    right: 30,
+  };
+  const svg = div
+    .append('svg')
+    .attr('height', size.height)
+    .attr('width', size.width)
+    .style('background-color', '#ededed');
+
+  /*
+    Create Scales:
+  */
+
+  const x = scaleTime()
+    .domain(extent(plotData, (d) => d.year))
+    .range([margin.left, size.width - margin.right]);
+
+  const y = scaleLinear()
+    .domain([2.5, 5])
+    .range([size.height - margin.bottom, margin.top]);
+
+  /*
+    Start Plot:
+  */
+  console.log(plotData);
+  const myLine = line()
+    .x((d) => x(d.year))
+    .y((d) => y(d.value));
+
+  svg
+    .selectAll('lines')
+    .data([plotData])
+    .enter()
+    .append('path')
+    .attr('d', myLine)
+    .attr('stroke', 'black')
+    .attr('fill', 'none');
+  /*
+    Animation:
+  */
+
+  /*
+    Define Axes:
+  */
+  const xAxis = svg
+    .append('g')
+    .attr('transform', `translate(0, ${size.height - margin.bottom})`)
+    .attr('color', 'black')
+    .call(axisBottom(x));
+
+  const yAxis = svg
+    .append('g')
+    .attr('transform', `translate(${margin.left}, 0)`)
+    .attr('color', 'black')
+    .call(axisLeft(y));
+};
+
 const makeLineCharts = (data) => {
   /*
     Container Setup:
@@ -29,46 +101,21 @@ const makeLineCharts = (data) => {
     'class',
     'rate-my-prof',
   );
+
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
-  container.append('h1').text('Line title');
+  const qualityData = data.filter((d) => d.variable === 'quality');
+  const difficultyData = data.filter((d) => d.variable === 'difficulty');
 
-  const size = {
-    height: 400,
-    width: Math.min(600, window.innerWidth - 40),
-  };
+  // const xMax = max(data, (d) => d.n);
 
-  const margin = {
-    top: 10,
-    right: 10,
-    bottom: 10,
-    left: 10,
-  };
+  const qualityDiv = container.append('div');
+  makeSinglePlot(qualityDiv, qualityData, 'Quality Ratings', '#4e79a7');
 
-  const svg = container
-    .append('svg')
-    .attr('height', size.height)
-    .attr('width', size.width);
-
+  const difficultyDiv = container.append('div');
+  makeSinglePlot(difficultyDiv, difficultyData, 'Difficulty Ratings', '#e15759');
   container.append('a').text('Source: __________').attr('href', '');
-
-  /*
-    Create Scales:
-  */
-  const uniqueYears = data.map((d) => d.year).filter(onlyUnique);
-  console.log(uniqueYears);
-  const x = scaleBand()
-    .domain(uniqueYears)
-    .range([margin.left, size.width - margin.right]);
-
-  const y = scaleLinear()
-    .domain([1, 5])
-    .range([size.height - margin.bottom, margin.top]);
-
-  /*
-    Start Plot:
-  */
 };
 
 export default makeLineCharts;
