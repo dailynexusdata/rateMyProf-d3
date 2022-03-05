@@ -16,31 +16,7 @@ import { axisBottom, axisLeft } from 'd3-axis';
  * @since Date
  */
 
-function colorPicker(num) {
-  if (num < 0.5) {
-    return '#ff9c9c';
-  }
-  if (num > 0.6) {
-    return '#68ffbe';
-  }
-
-  return '#ebc934';
-}
-
-const makePositiveChart = (data) => {
-  /*
-    Container Setup:
-  */
-  const plotData = data.slice(0, 10);
-  console.log(plotData);
-  // The class is necessary to apply styling
-  const container = select('#rate-my-prof-positive-dept-plot').attr('class', 'rate-my-prof');
-
-  // When the resize event is called, reset the plot
-  container.selectAll('*').remove();
-
-  container.append('h1').text('Proportion of Words Indicating "Positive Sentiment" by Department, Sorted by Most Reviewed');
-
+const makeSinglePlot = (div, data, title, color) => {
   const size = {
     height: 400,
     width: Math.min(600, window.innerWidth - 40),
@@ -48,17 +24,17 @@ const makePositiveChart = (data) => {
 
   const margin = {
     top: 10,
-    right: 10,
+    right: 20,
     bottom: 20,
-    left: 80,
+    left: 140,
   };
 
-  const svg = container
+  const svg = div
     .append('svg')
     .attr('height', size.height)
     .attr('width', size.width);
 
-  container
+  div
     .append('a')
     .text('Source: RateMyProfessor.com')
     .attr('href', '');
@@ -72,7 +48,7 @@ const makePositiveChart = (data) => {
     .range([margin.left, size.width - margin.right]);
 
   const y = scaleBand()
-    .domain(plotData.map((d) => d.Dept))
+    .domain(data.map((d) => d.Dept))
     .range([size.height - margin.bottom, margin.top])
     .padding(0.1);
 
@@ -82,7 +58,7 @@ const makePositiveChart = (data) => {
 
   const bars = svg
     .selectAll('.rate-my-prof-bars')
-    .data(plotData)
+    .data(data)
     .enter()
     .append('rect')
     .attr('class', 'rate-my-prof-bars')
@@ -91,7 +67,7 @@ const makePositiveChart = (data) => {
     .attr('height', y.bandwidth())
     .attr('x', margin.left)
     .attr('y', (d) => y(d.Dept))
-    .style('fill', (d) => colorPicker(d.positive_percapita));
+    .style('fill', color);
 
   svg.selectAll('rect')
     .transition()
@@ -111,6 +87,24 @@ const makePositiveChart = (data) => {
     .attr('transform', `translate(${margin.left}, 0)`)
     .attr('color', 'black')
     .call(axisLeft(y));
+};
+
+const makePositiveChart = (data) => {
+  /*
+    Container Setup:
+  */
+  const negData = data.slice(0, 10);
+  const posData = data.slice(Math.max(data.length - 10, 1));
+  // The class is necessary to apply styling
+  const container = select('#rate-my-prof-positive-dept-plot').attr('class', 'rate-my-prof');
+
+  // When the resize event is called, reset the plot
+  container.selectAll('*').remove();
+
+  const posDiv = container.append('div');
+  const negDiv = container.append('div');
+  makeSinglePlot(posDiv, posData, 'Most Positively Reviewed Departments', '#68ffbe');
+  makeSinglePlot(negDiv, negData, 'Most Negatively Reviewed Departments', 'ff9c9c');
 };
 
 export default makePositiveChart;

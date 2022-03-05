@@ -40,7 +40,10 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
     .attr('height', size.height)
     .attr('width', size.width)
     .style('background-color', '#ededed');
-
+  svg.append('h3')
+    .attr('x', 20)
+    .attr('y', 50)
+    .text(title);
   /*
     Create Scales:
   */

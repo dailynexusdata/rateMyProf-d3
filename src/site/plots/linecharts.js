@@ -6,10 +6,10 @@
  */
 import { select } from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';
-import { line } from 'd3-shape';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { timeParse } from 'd3-time-format';
 import { extent } from 'd3-array';
+import { area, curveCatmullRom, line } from 'd3-shape';
 /**
  * @param {*} data - What is the data?
  *
@@ -43,6 +43,7 @@ const makeSinglePlot = (div, data, title, color) => {
     .attr('width', size.width)
     .style('background-color', '#ededed');
 
+  svg.append('text').text(title).attr('x', 5).attr('y', 20);
   /*
     Create Scales:
   */
@@ -61,7 +62,8 @@ const makeSinglePlot = (div, data, title, color) => {
   console.log(plotData);
   const myLine = line()
     .x((d) => x(d.year))
-    .y((d) => y(d.value));
+    .y((d) => y(d.value))
+    .curve(curveCatmullRom);
 
   svg
     .selectAll('lines')
@@ -70,7 +72,8 @@ const makeSinglePlot = (div, data, title, color) => {
     .append('path')
     .attr('d', myLine)
     .attr('stroke', 'black')
-    .attr('fill', 'none');
+    .attr('fill', 'none')
+    .attr('stroke-width', '1.5px');
   /*
     Animation:
   */
