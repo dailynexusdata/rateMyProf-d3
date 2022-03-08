@@ -6,7 +6,7 @@
  */
 import { select } from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';
-import { axisBottom, axisLeft } from 'd3-axis';
+import { axisBottom, axisLeft, axisRight } from 'd3-axis';
 import { timeParse } from 'd3-time-format';
 import { extent } from 'd3-array';
 import { area, curveCatmullRom, line } from 'd3-shape';
@@ -22,78 +22,6 @@ function onlyUnique(value, index, self) {
   return self.indexOf(value) === index;
 }
 
-const makeSinglePlot = (div, data, title, color) => {
-  /*
-    Container Setup:
-  */
-  const plotData = data.map((d) => ({ year: timeParse('%Y')(d.year), value: parseFloat(d.value) }));
-  const size = {
-    height: 400,
-    width: Math.min(600, window.innerWidth - 40),
-  };
-  const margin = {
-    top: 35,
-    left: 72,
-    bottom: 70,
-    right: 30,
-  };
-  const svg = div
-    .append('svg')
-    .attr('height', size.height)
-    .attr('width', size.width)
-    .style('background-color', '#ededed');
-
-  svg.append('text').text(title).attr('x', 5).attr('y', 20);
-  /*
-    Create Scales:
-  */
-
-  const x = scaleTime()
-    .domain(extent(plotData, (d) => d.year))
-    .range([margin.left, size.width - margin.right]);
-
-  const y = scaleLinear()
-    .domain([2.5, 5])
-    .range([size.height - margin.bottom, margin.top]);
-
-  /*
-    Start Plot:
-  */
-  console.log(plotData);
-  const myLine = line()
-    .x((d) => x(d.year))
-    .y((d) => y(d.value))
-    .curve(curveCatmullRom);
-
-  svg
-    .selectAll('lines')
-    .data([plotData])
-    .enter()
-    .append('path')
-    .attr('d', myLine)
-    .attr('stroke', 'black')
-    .attr('fill', 'none')
-    .attr('stroke-width', '1.5px');
-  /*
-    Animation:
-  */
-
-  /*
-    Define Axes:
-  */
-  const xAxis = svg
-    .append('g')
-    .attr('transform', `translate(0, ${size.height - margin.bottom})`)
-    .attr('color', 'black')
-    .call(axisBottom(x));
-
-  const yAxis = svg
-    .append('g')
-    .attr('transform', `translate(${margin.left}, 0)`)
-    .attr('color', 'black')
-    .call(axisLeft(y));
-};
-
 const makeLineCharts = (data) => {
   /*
     Container Setup:
@@ -108,17 +36,105 @@ const makeLineCharts = (data) => {
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
-  const qualityData = data.filter((d) => d.variable === 'quality');
-  const difficultyData = data.filter((d) => d.variable === 'difficulty');
+  const plotData = data.filter((d) => +d.year > 2002).map((d) => ({ ...d, year: +d.year, value: +d.value }));
+
+  const qualityData = plotData.filter((d) => d.variable === 'quality');
+  const difficultyData = plotData.filter((d) => d.variable === 'difficulty');
 
   // const xMax = max(data, (d) => d.n);
 
-  const qualityDiv = container.append('div');
-  makeSinglePlot(qualityDiv, qualityData, 'Quality Ratings', '#4e79a7');
+  const div = container.append('div');
 
-  const difficultyDiv = container.append('div');
-  makeSinglePlot(difficultyDiv, difficultyData, 'Difficulty Ratings', '#e15759');
-  container.append('a').text('Source: __________').attr('href', '');
+  const size = {
+    height: 400,
+    width: Math.min(600, window.innerWidth - 40),
+  };
+  const margin = {
+    top: 30,
+    left: 30,
+    bottom: 30,
+    right: 30,
+  };
+
+  div.append('h1').text('My title');
+
+  const svg = div
+    .append('svg')
+    .attr('height', size.height)
+    .attr('width', size.width)
+    .attr('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    .attr('xmlns', 'http://www.w3.org/2000/svg');
+
+  /*
+    Create Scales:
+  */
+
+  const x = scaleLinear()
+    .domain(extent(plotData, (d) => d.year))
+    .range([margin.left, size.width - margin.right]);
+
+  const y = scaleLinear()
+    .domain([0, 4])
+    .range([size.height - margin.bottom, margin.top]);
+
+  /*
+    Start Plot:
+  */
+  console.log(plotData);
+  const myLine = line()
+    .x((d) => x(d.year))
+    .y((d) => y(d.value))
+    .curve(curveCatmullRom);
+
+  svg.append('defs').append('mask').attr('id', 'line-chart-mask')
+    .append('rect')
+    .attr('fill-opacity', '50%')
+    .attr('x', margin.left)
+    .attr('width', x(2013) - margin.left)
+    .attr('y', margin.top)
+    .attr('height', size.height - margin.bottom - margin.top);
+
+  svg
+    .selectAll('lines')
+    .data([qualityData, difficultyData])
+    .enter()
+    .append('path')
+    .attr('mask', 'url(#line-chart-mask)')
+    .attr('d', myLine)
+    .attr('stroke', (_, i) => ['#4e79a7', '#f28e2c'][i])
+    .attr('fill', 'none')
+    .attr('stroke-width', '2px');
+  /*
+    Animation:
+  */
+
+  /*
+    Define Axes:
+  */
+  const xAxis = svg
+    .append('g')
+    .style('font-size', '12pt')
+    .attr('transform', `translate(0, ${size.height - margin.bottom})`)
+    .attr('color', '#adadad')
+    .call(axisBottom(x).ticks(5).tickFormat((d) => parseInt(d)));
+
+  const leftAxis = svg
+    .append('g')
+    .style('font-size', '12pt')
+    .attr('transform', `translate(${margin.left}, 0)`)
+    .attr('color', '#adadad')
+    .call(axisLeft(y).tickValues([1, 2, 3, 4]).tickFormat((d) => parseInt(d)));
+
+  leftAxis.select('path').remove();
+
+  const rightAxis = svg
+    .append('g')
+    .style('font-size', '12pt')
+    .attr('transform', `translate(${size.width - margin.right}, 0)`)
+    .attr('color', '#adadad')
+    .call(axisRight(y).tickValues([1, 2, 3, 4]).tickFormat((d) => parseInt(d)));
+
+  rightAxis.select('path').remove();
 };
 
 export default makeLineCharts;
