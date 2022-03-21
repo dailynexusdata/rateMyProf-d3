@@ -85,15 +85,6 @@ const makeLineCharts = (data) => {
     .x((d) => x(d.year))
     .y((d) => y(d.value))
     .curve(curveCatmullRom);
-
-  svg.append('defs').append('mask').attr('id', 'line-chart-mask')
-    .append('rect')
-    .attr('fill-opacity', '50%')
-    .attr('x', margin.left)
-    .attr('width', x(2013) - margin.left)
-    .attr('y', margin.top)
-    .attr('height', size.height - margin.bottom - margin.top);
-
   svg
     .selectAll('lines')
     .data([qualityData, difficultyData])
@@ -104,6 +95,62 @@ const makeLineCharts = (data) => {
     .attr('stroke', (_, i) => ['#4e79a7', '#f28e2c'][i])
     .attr('fill', 'none')
     .attr('stroke-width', '2px');
+
+  svg.append('line') // attach a line
+    .style('stroke', '#e15759') // colour the line
+    .attr('x1', x('2013')) // x position of the first end of the line
+    .attr('y1', y(3.8)) // y position of the first end of the line
+    .attr('x2', x('2013')) // x position of the second end of the line
+    .style('stroke-dasharray', ('5, 5'))
+    .attr('y2', y(2));
+
+  svg.append('text')
+    .attr('x', x('2013'))
+    .attr('y', y(3.82))
+    .attr('fill', '#e15759')
+    .style('font-size', '10px')
+    .style('font-family', 'Arial, Helvetica, sans-serif')
+    .attr('text-anchor', 'middle')
+    .attr('alignment-baseline', 'alphabetic')
+    .text('Quality peaks/Difficulty at lowest');
+
+  svg.append('line') // attach a line
+    .style('stroke', '#e15759') // colour the line
+    .attr('x1', x('2020')) // x position of the first end of the line
+    .attr('y1', y(3.8)) // y position of the first end of the line
+    .attr('x2', x('2020')) // x position of the second end of the line
+    .style('stroke-dasharray', ('5, 5'))
+    .attr('y2', y(2));
+
+  svg.append('text')
+    .attr('x', x('2020'))
+    .attr('y', y(3.82))
+    .attr('fill', '#e15759')
+    .style('font-size', '10px')
+    .style('font-family', 'Arial, Helvetica, sans-serif')
+    .attr('text-anchor', 'middle')
+    .attr('alignment-baseline', 'alphabetic')
+    .text('COVID pandemic begins');
+
+  svg.append('text')
+    .attr('x', x('2004'))
+    .attr('y', y(3.68))
+    .attr('fill', '#4e79a7')
+    .style('font-size', '10px')
+    .style('font-family', 'Arial, Helvetica, sans-serif')
+    .attr('text-anchor', 'middle')
+    .attr('alignment-baseline', 'alphabetic')
+    .text('Quality Ratings');
+
+  svg.append('text')
+    .attr('x', x('2004'))
+    .attr('y', y(3.05))
+    .attr('fill', '#f28e2c')
+    .style('font-size', '10px')
+    .style('font-family', 'Arial, Helvetica, sans-serif')
+    .attr('text-anchor', 'middle')
+    .attr('alignment-baseline', 'alphabetic')
+    .text('Difficulty Ratings');
   /*
     Animation:
   */
