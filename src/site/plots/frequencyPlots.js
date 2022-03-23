@@ -8,6 +8,7 @@ import { select, selectAll } from 'd3-selection';
 import { scaleLog } from 'd3-scale';
 import { min, max } from 'd3-array';
 import { transition } from 'd3-transition';
+import { axisBottom, axisLeft } from 'd3-axis';
 /**
  * @param {*} data - What is the data? textcounts.csv, a dataframe made in R by scraping ratemyprof
  * for text, each column is a department, and each row is a word with its count.
@@ -100,8 +101,8 @@ const makeFrequencyPlot = (data) => {
   const margin = {
     top: 10,
     right: 10,
-    bottom: 10,
-    left: 10,
+    bottom: 60,
+    left: 50,
   };
 
   const svg = container
@@ -180,9 +181,31 @@ const makeFrequencyPlot = (data) => {
       .domain([minX, maxX])
       .range([margin.left, size.width - margin.right]);
 
+    const xaxis = svg.append('g')
+      .attr('transform', `translate(0,${size.height - margin.bottom + 10})`)
+      .call(axisBottom(x).ticks(size.width / 80, ','))
+      .call((g) => g.select('.domain').remove())
+      .call((g) => g.append('text')
+        .attr('x', size.width)
+        .attr('y', margin.bottom - 30)
+        .attr('fill', 'currentColor')
+        .attr('text-anchor', 'end')
+        .text(`${firstDept} →`));
+
     const y = scaleLog()
       .domain([minY, maxY])
       .range([size.height - margin.bottom, margin.top]);
+
+    const yAxis = svg.append('g')
+      .attr('transform', `translate(${margin.left - 10},0)`)
+      .call(axisLeft(y).ticks(size.height / 80, ','))
+      .call((g) => g.select('.domain').remove())
+      .call((g) => g.append('text')
+        .attr('x', -20)
+        .attr('y', 10)
+        .attr('fill', 'currentColor')
+        .attr('text-anchor', 'start')
+        .text(`${secondDept}↑`));
     /*
       Start Plot:
     */
