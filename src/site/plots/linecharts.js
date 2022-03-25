@@ -35,9 +35,7 @@ const makeLineCharts = (data) => {
 
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
-
-  const plotData = data.filter((d) => +d.year > 2002).map((d) => ({ ...d, year: +d.year, value: +d.value }));
-
+  const plotData = data.map((d) => ({ ...d, date: new Date(d.monthyear) }));
   const qualityData = plotData.filter((d) => d.variable === 'quality');
   const difficultyData = plotData.filter((d) => d.variable === 'difficulty');
 
@@ -68,9 +66,9 @@ const makeLineCharts = (data) => {
   /*
     Create Scales:
   */
-
-  const x = scaleLinear()
-    .domain(extent(plotData, (d) => d.year))
+  console.log(plotData);
+  const x = scaleTime()
+    .domain([plotData[0].date, plotData[plotData.length - 1].date])
     .range([margin.left, size.width - margin.right]);
 
   const y = scaleLinear()
@@ -80,9 +78,8 @@ const makeLineCharts = (data) => {
   /*
     Start Plot:
   */
-  console.log(plotData);
   const myLine = line()
-    .x((d) => x(d.year))
+    .x((d) => x(d.date))
     .y((d) => y(d.value))
     .curve(curveCatmullRom);
   svg
@@ -99,6 +96,14 @@ const makeLineCharts = (data) => {
   svg.append('line') // attach a line
     .style('stroke', '#e15759') // colour the line
     .attr('x1', x('2013')) // x position of the first end of the line
+    .attr('y1', y(3.8)) // y position of the first end of the line
+    .attr('x2', x('2013')) // x position of the second end of the line
+    .style('stroke-dasharray', ('5, 5'))
+    .attr('y2', y(2));
+
+  svg.append('line') // attach a line
+    .style('stroke', '#000000') // colour the line
+    .attr('x1', x('2022')) // x position of the first end of the line
     .attr('y1', y(3.8)) // y position of the first end of the line
     .attr('x2', x('2013')) // x position of the second end of the line
     .style('stroke-dasharray', ('5, 5'))
@@ -163,7 +168,7 @@ const makeLineCharts = (data) => {
     .style('font-size', '12pt')
     .attr('transform', `translate(0, ${size.height - margin.bottom})`)
     .attr('color', '#adadad')
-    .call(axisBottom(x).ticks(5).tickFormat((d) => parseInt(d)));
+    .call(axisBottom(x).ticks(5));
 
   const leftAxis = svg
     .append('g')
