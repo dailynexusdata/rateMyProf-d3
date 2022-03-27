@@ -13,8 +13,15 @@ import makeFrequencyPlot from './plots/frequencyPlots';
 
 const main = async () => {
   const linesData = await csv('dist/data/lines.csv');
-  const barplotsData = await csv('dist/data/barchart.csv');
+
+  // convert 'n' to number:
+  const barplotsData = await csv('dist/data/barchart.csv', (d) => ({
+    ...d,
+    n: +d.n,
+  }));
+
   const frequencyData = await csv('dist/data/textcounts.csv');
+
   const resize = () => {
     makeBarPlots(barplotsData);
     makeLineCharts(linesData);
