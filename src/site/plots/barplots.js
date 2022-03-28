@@ -8,6 +8,7 @@ import { select, selectAll } from 'd3-selection';
 import { scaleBand, scaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { max } from 'd3-array';
+import { transition } from 'd3-transition';
 
 /**
  * @author Jordan Russo
@@ -30,16 +31,19 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
   };
   const margin = {
     top: 35,
-    left: 70,
+    left: 72,
     bottom: 30,
-    right: 20,
+    right: 30,
   };
   const svg = div
     .append('svg')
     .attr('height', size.height)
     .attr('width', size.width)
     .style('background-color', '#ededed');
-
+  svg.append('h3')
+    .attr('x', 20)
+    .attr('y', 50)
+    .text(title);
   /*
     Create Scales:
   */
@@ -55,6 +59,7 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
   /*
     Start Plot:
   */
+
   const bars = svg
     .selectAll('.rate-my-prof-bars')
     .data(d)
@@ -62,11 +67,33 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
     .append('rect')
     .attr('class', 'rate-my-prof-bars')
     // for the width of the bar you'll typically have to subtract the starting point:
-    .attr('width', (d) => x(d.n) - x(0))
-    .attr('height', (d) => y.bandwidth())
+    .attr('width', 0)
+    .attr('height', y.bandwidth())
     .attr('x', margin.left)
     .attr('y', (d) => y(d.word))
-    .style('fill', color);
+    .style('fill', color)
+    .on('mouseenter', (event, d) => {
+      svg
+        .append('text')
+        .attr('x', margin.left + x(d.n) - x(0))
+        .attr('y', y(d.word) + 20)
+        .text(d.n)
+        .attr('class', 'hover-over-text')
+        .style('font-size', 'small');
+    })
+    .on('mouseleave', () => {
+      selectAll('.hover-over-text').remove();
+    });
+
+  /*
+    Animation:
+  */
+  svg.selectAll('rect')
+    .transition()
+    .duration(800)
+    .attr('x', margin.left)
+    .attr('width', (d) => x(d.n) - x(0))
+    .delay((d, i) => i * 100);
 
   /*
     Define Axes:
@@ -83,24 +110,29 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
     .attr('color', 'black')
     .call(axisLeft(y));
 };
+
 const makeBarPlots = (data) => {
   const container = select('#rate-my-prof-bar-plot')
     .attr('class', 'rate-my-prof')
     .style('display', 'grid')
     .style('grid-template-columns', '1fr 1fr');
 
-  console.log(data);
   container.selectAll('*').remove();
+
   const posData = data.filter((d) => d.sentiment === 'positive');
   const negData = data.filter((d) => d.sentiment === 'negative');
 
-  const xMax = max(data, (d) => d.n);
+  const xMax = max(data.map((d) => parseInt(d.n))) + 1000;
+
+  // const xMax = max(data, (d) => d.n);
 
   const posDiv = container.append('div');
   makeSinglePlot(posDiv, posData, 'Positive Sentiments', '#4e79a7', xMax);
 
   const negDiv = container.append('div');
   makeSinglePlot(negDiv, negData, 'Negative Sentiments', '#e15759', xMax);
+
+  container.append('a').text('Source: __________').attr('href', '');
 };
 
 export default makeBarPlots;

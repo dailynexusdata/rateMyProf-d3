@@ -4,9 +4,11 @@
  * @author Name
  *
  */
-import { select } from 'd3-selection';
+import { select, selectAll } from 'd3-selection';
 import { scaleLog } from 'd3-scale';
 import { min, max } from 'd3-array';
+import transition from 'd3-transition';
+import { axisBottom, axisLeft } from 'd3-axis';
 /**
  * @param {*} data - What is the data? textcounts.csv, a dataframe made in R by scraping ratemyprof
  * for text, each column is a department, and each row is a word with its count.
@@ -15,6 +17,7 @@ import { min, max } from 'd3-array';
  *
  * @since 11/29/2021
  */
+let playBack = null;
 
 const randomJitter = (coord) =>
   // Math.random() - 0.5 is a number [-0.5, 0.5]
@@ -22,12 +25,20 @@ const randomJitter = (coord) =>
   // I'm not sure if you want it to be an integer, you could remove the last math.round
   coord + Math.round(20 * (Math.random() - 0.5));
 
+const buttonClick = () => {
+  firstSelectIndex = document.getElementById(
+    'first-option-frequency-selector',
+  ).selectedIndex;
+  secondSelectIndex = document.getElementById(
+    'second-option-frequency-selector',
+  ).selectedIndex;
+  makePlot();
+};
 const makeFrequencyPlot = (data) => {
   /*
     Container Setup:
   */
 
-  console.log(data);
   // The class is necessary to apply styling
   const container = select('#rate-my-prof-frequency-plot').attr(
     'class',
@@ -53,6 +64,7 @@ const makeFrequencyPlot = (data) => {
     secondSelectIndex = document.getElementById(
       'second-option-frequency-selector',
     ).selectedIndex;
+    cancelAnimationFrame(playBack);
     makePlot();
   };
 
@@ -85,16 +97,6 @@ const makeFrequencyPlot = (data) => {
     .attr('value', (d) => d)
     .property('selected', (d) => d === 'Art');
 
-  // I think it would be easier to get rid of the button?
-  const plotButton = container
-    .append('button')
-    .text('Make Plot')
-    .on('click', () => {
-      // const s = firstSelector[0];
-      // console.log(s.options[s.selectedIndex].text);
-      buttonClick();
-    });
-
   const size = {
     height: 400,
     width: Math.min(600, window.innerWidth - 40),
@@ -103,8 +105,8 @@ const makeFrequencyPlot = (data) => {
   const margin = {
     top: 10,
     right: 10,
-    bottom: 10,
-    left: 10,
+    bottom: 60,
+    left: 50,
   };
 
   const svg = container
@@ -117,8 +119,109 @@ const makeFrequencyPlot = (data) => {
   /*
     Create Scales:
   */
+  let circleLabels = null;
+
+  const toKeep = (x, y) => {
+    const r = y / x;
+
+    // near axis
+    if (r > 100 || r < 0.01) {
+      return true;
+    }
+    // near line
+    if (r > 0.95 && r < 1.05) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const addAnimations = (dur = 0, std = 0) => {
+    const newLabels = circleLabels
+      .sort(([, ax, ay], [, bx, by]) => {
+        const keepA = toKeep(ax, ay);
+        const keepB = toKeep(bx, by);
+
+        if (keepA && !keepB) {
+          return -1;
+        }
+        if (keepB && !keepA) {
+          return 1;
+        }
+
+        return Math.random() - 0.5;
+      })
+      .attr('show-word', true);
+
+    newLabels.each(function () {
+      const that = this;
+
+      // this is basically the same function, just for svgs,
+      // doesn't really matter:
+      const a = this.getBBox();
+
+      // console.log(
+      //   select(this).attr('show-word'),
+      //   select(this).attr('show-word') === 'false',
+      // );
+      if (select(this).attr('show-word') === 'false') {
+        return;
+      }
+
+      newLabels.each(function () {
+        if (this === that) {
+          return;
+        }
+
+        const sel = select(this);
+
+        if (sel.attr('show-word') === 'false') {
+          return;
+        }
+
+        const b = this.getBBox();
+
+        // Instead of adding the heights together, I'm just looking at the one
+        // height that matters (Because of the text size, both heights are
+        // probably the same). If you draw two slightly overlapping rectangles,
+        // label the bottom left corner (x_i, y_i) and the heights and widths, I think
+        // it makes sense.
+        // the `+5` just adds a little bit of padding, you can adjust or remove
+        if (
+          Math.abs(a.x - b.x) < (a.x < b.x ? a.width : b.width) + 5
+          && Math.abs(a.y - b.y) < (a.y < b.y ? b.height : a.height) + 5
+        ) {
+          sel.attr('show-word', false);
+        }
+      });
+    });
+
+    newLabels
+      .filter(function () {
+        return select(this).attr('show-word') === 'true';
+      })
+      .each(function () {
+        select(this)
+          .transition()
+          .style('opacity', 0.6)
+          .duration(dur + (Math.random() - 0.5) * std * 2);
+      });
+
+    newLabels
+      .filter(function () {
+        return select(this).attr('show-word') === 'false';
+      })
+      .each(function () {
+        select(this)
+          .transition()
+          .style('opacity', 0)
+          .duration(dur + (Math.random() - 0.5) * std * 2);
+      });
+  };
+
   const makePlot = () => {
     svg.selectAll('*').remove();
+
     const firstDept = depts[firstSelectIndex];
     const secondDept = depts[secondSelectIndex];
     const plotData = data
@@ -133,15 +236,42 @@ const makeFrequencyPlot = (data) => {
       .domain([minX, maxX])
       .range([margin.left, size.width - margin.right]);
 
+    const xaxis = svg
+      .append('g')
+      .attr('transform', `translate(0,${size.height - margin.bottom + 10})`)
+      .call(axisBottom(x).ticks(size.width / 80, ','))
+      .call((g) => g.select('.domain').remove())
+      .call((g) => g
+        .append('text')
+        .attr('x', size.width)
+        .attr('y', margin.bottom - 30)
+        .attr('fill', 'currentColor')
+        .attr('text-anchor', 'end')
+        .text(`${firstDept} →`));
+
     const y = scaleLog()
       .domain([minY, maxY])
       .range([size.height - margin.bottom, margin.top]);
+
+    const yAxis = svg
+      .append('g')
+      .attr('transform', `translate(${margin.left - 10},0)`)
+      .call(axisLeft(y).ticks(size.height / 80, ','))
+      .call((g) => g.select('.domain').remove())
+      .call((g) => g
+        .append('text')
+        .attr('x', -20)
+        .attr('y', 10)
+        .attr('fill', 'currentColor')
+        .attr('text-anchor', 'start')
+        .text(`${secondDept}↑`));
     /*
       Start Plot:
     */
     console.log(x(1));
     svg
       .append('line')
+
       .attr('x1', x(minX))
       .attr('x2', x(maxX))
       .attr('y1', y(minY))
@@ -174,8 +304,8 @@ const makeFrequencyPlot = (data) => {
       .style('fill', '#69b3a2')
       .style('opacity', '0.15');
 
-    const circleLabels = circleGroup
-      .data(plotData.filter((d, i) => i % 5 === 0))
+    circleLabels = circleGroup
+      .data(plotData)
       .append('text')
       .attr('x', (d) => x(d[1]))
       .attr('y', (d) => y(d[2]))
@@ -185,33 +315,20 @@ const makeFrequencyPlot = (data) => {
       .style('font-size', '14px')
       .style('opacity', '0.6');
 
-    circleLabels.each(function () {
-      const that = this;
+    let start = 0;
 
-      // this is basically the same function, just for svgs,
-      // doesn't really matter:
-      const a = this.getBBox();
+    const animate = (dt) => {
+      if (dt - start > 5000) {
+        start = dt;
+        addAnimations(1000, 300);
+      }
+      playBack = window.requestAnimationFrame(animate);
+    };
 
-      circleLabels.each(function () {
-        if (this !== that) {
-          const b = this.getBBox();
-
-          // Instead of adding the heights together, I'm just looking at the one
-          // height that matters (Because of the text size, both heights are
-          // probably the same). If you draw two slightly overlapping rectangles,
-          // label the bottom left corner (x_i, y_i) and the heights and widths, I think
-          // it makes sense.
-          // the `+5` just adds a little bit of padding, you can adjust or remove
-          if (
-            Math.abs(a.x - b.x) < (a.x < b.x ? a.width : b.width) + 5
-            && Math.abs(a.y - b.y) < (a.y < b.y ? b.height : a.height) + 5
-          ) {
-            this.remove();
-          }
-        }
-      });
-    });
+    addAnimations();
+    playBack = window.requestAnimationFrame(animate);
   };
+
   makePlot();
 };
 
