@@ -9,6 +9,7 @@ import { scaleTime, scaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft, axisRight } from 'd3-axis';
 import { timeParse } from 'd3-time-format';
 import { extent } from 'd3-array';
+import { format } from 'd3-format';
 import { area, curveCatmullRom, line } from 'd3-shape';
 /**
  * @param {*} data - What is the data?
@@ -35,7 +36,8 @@ const makeLineCharts = (data) => {
 
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
-  const plotData = data.map((d) => ({ ...d, date: new Date(d.monthyear) }));
+  const plotData = data;
+  // const plotData = data.map((d) => ({ ...d, date: new Date(d.monthyear) }));
   const qualityData = plotData.filter((d) => d.variable === 'quality');
   const difficultyData = plotData.filter((d) => d.variable === 'difficulty');
 
@@ -67,19 +69,19 @@ const makeLineCharts = (data) => {
     Create Scales:
   */
   console.log(plotData);
-  const x = scaleTime()
-    .domain([plotData[0].date, plotData[plotData.length - 1].date])
+  const x = scaleLinear()
+    .domain([2003, 2023])
     .range([margin.left, size.width - margin.right]);
 
   const y = scaleLinear()
-    .domain([0, 4])
+    .domain([2, 4])
     .range([size.height - margin.bottom, margin.top]);
 
   /*
     Start Plot:
   */
   const myLine = line()
-    .x((d) => x(d.date))
+    .x((d) => x(d.year))
     .y((d) => y(d.value))
     .curve(curveCatmullRom);
   svg
@@ -96,18 +98,26 @@ const makeLineCharts = (data) => {
   svg.append('line') // attach a line
     .style('stroke', '#e15759') // colour the line
     .attr('x1', x('2013')) // x position of the first end of the line
-    .attr('y1', y(3.8)) // y position of the first end of the line
+    .attr('y1', y(3.78)) // y position of the first end of the line
     .attr('x2', x('2013')) // x position of the second end of the line
     .style('stroke-dasharray', ('5, 5'))
     .attr('y2', y(2));
 
   svg.append('line') // attach a line
-    .style('stroke', '#000000') // colour the line
-    .attr('x1', x('2022')) // x position of the first end of the line
-    .attr('y1', y(3.8)) // y position of the first end of the line
-    .attr('x2', x('2013')) // x position of the second end of the line
+    .style('stroke', '#4e79a7') // colour the line
+    .attr('x1', x('2013')) // x position of the first end of the line
+    .attr('y1', y(3.78)) // y position of the first end of the line
+    .attr('x2', x('2021')) // x position of the second end of the line
     .style('stroke-dasharray', ('5, 5'))
-    .attr('y2', y(2));
+    .attr('y2', y(3.41));
+
+  svg.append('line') // attach a line
+    .style('stroke', '#f28e2c') // colour the line
+    .attr('x1', x('2013')) // x position of the first end of the line
+    .attr('y1', y(2.8)) // y position of the first end of the line
+    .attr('x2', x('2021')) // x position of the second end of the line
+    .style('stroke-dasharray', ('5, 5'))
+    .attr('y2', y(3.31));
 
   svg.append('text')
     .attr('x', x('2013'))
@@ -126,7 +136,13 @@ const makeLineCharts = (data) => {
     .attr('x2', x('2020')) // x position of the second end of the line
     .style('stroke-dasharray', ('5, 5'))
     .attr('y2', y(2));
-
+  // ending line
+  svg.append('line') // attach a line
+    .style('stroke', '#adadad') // colour the line
+    .attr('x1', x('2023')) // x position of the first end of the line
+    .attr('y1', y(4)) // y position of the first end of the line
+    .attr('x2', x('2023')) // x position of the second end of the line
+    .attr('y2', y(2));
   svg.append('text')
     .attr('x', x('2020'))
     .attr('y', y(3.82))
@@ -156,6 +172,50 @@ const makeLineCharts = (data) => {
     .attr('text-anchor', 'middle')
     .attr('alignment-baseline', 'alphabetic')
     .text('Difficulty Ratings');
+
+  svg.append('text')
+    .attr('x', x('2021') + 10)
+    .attr('y', y(3.1))
+    .attr('fill', '#4e79a7')
+    .style('font-size', '10px')
+    .style('font-family', 'Arial, Helvetica, sans-serif')
+    .attr('text-anchor', 'middle')
+    .attr('alignment-baseline', 'alphabetic')
+    .text('Quality hits low');
+
+  svg.append('text')
+    .attr('x', x('2021') + 10)
+    .attr('y', y(3.1))
+    .attr('dy', '1.2em')
+    .attr('fill', '#4e79a7')
+    .style('font-size', '10px')
+    .style('font-family', 'Arial, Helvetica, sans-serif')
+    .attr('text-anchor', 'middle')
+    .attr('alignment-baseline', 'alphabetic')
+    .text('Difficulty peaks');
+  svg.append('circle')
+    .style('fill', '#4e79a7')
+    .attr('r', 3)
+    .attr('cx', x(2013))
+    .attr('cy', y(3.748));
+
+  svg.append('circle')
+    .style('fill', '#f28e2c')
+    .attr('r', 3)
+    .attr('cx', x(2013))
+    .attr('cy', y(2.7966));
+
+  svg.append('circle')
+    .style('fill', '#4e79a7')
+    .attr('r', 3)
+    .attr('cx', x(2021))
+    .attr('cy', y(3.41));
+
+  svg.append('circle')
+    .style('fill', '#f28e2c')
+    .attr('r', 3)
+    .attr('cx', x(2021))
+    .attr('cy', y(3.31));
   /*
     Animation:
   */
@@ -168,7 +228,7 @@ const makeLineCharts = (data) => {
     .style('font-size', '12pt')
     .attr('transform', `translate(0, ${size.height - margin.bottom})`)
     .attr('color', '#adadad')
-    .call(axisBottom(x).ticks(5));
+    .call(axisBottom(x).ticks(5).tickFormat(format('d')));
 
   const leftAxis = svg
     .append('g')

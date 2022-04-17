@@ -12,15 +12,15 @@ import makePositiveChart from './plots/positiveDeptPlot';
 // import makePLOT_NAME from "./PLOT_NAME";
 
 const main = async () => {
-  const linesData = await csv('dist/data/quarterReviews.csv');
+  const linesData = await csv('dist/data/lines.csv');
   const barplotsData = await csv('dist/data/barchart.csv');
   const frequencyData = await csv('dist/data/textcounts.csv');
   const posDeptData = await csv('dist/data/positive_frequencies.csv');
   const resize = () => {
-    makeBarPlots(barplotsData);
+    // makeBarPlots(barplotsData);
     makeLineCharts(linesData);
-    makeFrequencyPlot(frequencyData);
-    makePositiveChart(posDeptData);
+    // makeFrequencyPlot(frequencyData);
+    // makePositiveChart(posDeptData);
   };
 
   window.addEventListener('resize', () => {
