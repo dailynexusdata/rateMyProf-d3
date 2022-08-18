@@ -56,7 +56,7 @@ const makeLineCharts = (data) => {
     right: 30,
   };
 
-  div.append('h1').text('My title');
+  div.append('h1').text('Average Quality and Difficulty by Year');
 
   const svg = div
     .append('svg')
@@ -137,12 +137,22 @@ const makeLineCharts = (data) => {
     .style('stroke-dasharray', ('5, 5'))
     .attr('y2', y(2));
   // ending line
+
+  // right axis line
   svg.append('line') // attach a line
-    .style('stroke', '#adadad') // colour the line
+    .style('stroke', '#000000') // colour the line
     .attr('x1', x('2023')) // x position of the first end of the line
     .attr('y1', y(4)) // y position of the first end of the line
     .attr('x2', x('2023')) // x position of the second end of the line
     .attr('y2', y(2));
+  // left axis line
+  svg.append('line') // attach a line
+    .style('stroke', '#000000') // colour the line
+    .attr('x1', x('2003')) // x position of the first end of the line
+    .attr('y1', y(4)) // y position of the first end of the line
+    .attr('x2', x('2003')) // x position of the second end of the line
+    .attr('y2', y(2));
+
   svg.append('text')
     .attr('x', x('2020'))
     .attr('y', y(3.82))
@@ -154,7 +164,7 @@ const makeLineCharts = (data) => {
     .text('COVID pandemic begins');
 
   svg.append('text')
-    .attr('x', x('2004'))
+    .attr('x', x('2005'))
     .attr('y', y(3.68))
     .attr('fill', '#4e79a7')
     .style('font-size', '10px')
@@ -164,7 +174,7 @@ const makeLineCharts = (data) => {
     .text('Quality Ratings');
 
   svg.append('text')
-    .attr('x', x('2004'))
+    .attr('x', x('2005'))
     .attr('y', y(3.05))
     .attr('fill', '#f28e2c')
     .style('font-size', '10px')
@@ -193,6 +203,19 @@ const makeLineCharts = (data) => {
     .attr('text-anchor', 'middle')
     .attr('alignment-baseline', 'alphabetic')
     .text('Difficulty peaks');
+
+  svg.append('text')
+    .attr('x', size.width)
+    .attr('y', size.height / 2)
+    .attr('fill', '#adadad')
+    .style('font-size', '10px')
+    .style('font-family', 'Arial, Helvetica, sans-serif')
+    .attr('text-anchor', 'end')
+    .attr('transform', 'rotate(-90)')
+    .attr('dy', '.75em')
+    .attr('alignment-baseline', 'alphabetic')
+    .text('Average Rating');
+
   svg.append('circle')
     .style('fill', '#4e79a7')
     .attr('r', 3)
@@ -227,14 +250,13 @@ const makeLineCharts = (data) => {
     .append('g')
     .style('font-size', '12pt')
     .attr('transform', `translate(0, ${size.height - margin.bottom})`)
-    .attr('color', '#adadad')
+
     .call(axisBottom(x).ticks(5).tickFormat(format('d')));
 
   const leftAxis = svg
     .append('g')
     .style('font-size', '12pt')
     .attr('transform', `translate(${margin.left}, 0)`)
-    .attr('color', '#adadad')
     .call(axisLeft(y).tickValues([1, 2, 3, 4]).tickFormat((d) => parseInt(d)));
 
   leftAxis.select('path').remove();
@@ -243,7 +265,6 @@ const makeLineCharts = (data) => {
     .append('g')
     .style('font-size', '12pt')
     .attr('transform', `translate(${size.width - margin.right}, 0)`)
-    .attr('color', '#adadad')
     .call(axisRight(y).tickValues([1, 2, 3, 4]).tickFormat((d) => parseInt(d)));
 
   rightAxis.select('path').remove();

@@ -32,14 +32,13 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
   const margin = {
     top: 35,
     left: 72,
-    bottom: 30,
+    bottom: 40,
     right: 30,
   };
   const svg = div
     .append('svg')
     .attr('height', size.height)
-    .attr('width', size.width)
-    .style('background-color', '#ededed');
+    .attr('width', size.width);
   svg.append('h3')
     .attr('x', 20)
     .attr('y', 50)
@@ -109,10 +108,22 @@ const makeSinglePlot = (div, d, title, color, xMax) => {
     .attr('transform', `translate(${margin.left}, 0)`)
     .attr('color', 'black')
     .call(axisLeft(y));
+
+  const xLabel = svg.append('text')
+    .attr('x', x(xMax / 2))
+    .attr('y', size.height - margin.bottom + 30)
+    .style('font-size', '12px')
+    .style('text-anchor', 'middle')
+    .text('Word Count');
 };
 
 const makeBarPlots = (data) => {
+  const titleContainer = select('#rate-my-prof-bar-plot').append('div').attr('class', 'rate-my-prof');
+
+  titleContainer.append('h1').text('Top Words Used To Review UCSB Profs by Connotation').style('margin-bottom', '10px');
+  titleContainer.append('p').text('The UCSB Data team matched text collected from RMP reviews with the Bing Sentiment Lexicon to determine if a given word had a positive or negative connotation');
   const container = select('#rate-my-prof-bar-plot')
+    .append('div')
     .attr('class', 'rate-my-prof')
     .style('display', 'grid')
     .style('grid-template-columns', '1fr 1fr');
@@ -132,7 +143,11 @@ const makeBarPlots = (data) => {
   const negDiv = container.append('div');
   makeSinglePlot(negDiv, negData, 'Negative Sentiments', '#e15759', xMax);
 
-  container.append('a').text('Source: __________').attr('href', '');
+  container
+    .append('p')
+    .html(
+      'Source: RateMyProfessor.com',
+    ).style('margin-bottom', '10px');
 };
 
 export default makeBarPlots;

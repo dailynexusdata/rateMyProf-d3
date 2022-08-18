@@ -8,15 +8,16 @@ import { select } from 'd3-selection';
 import { scaleLinear, scaleBand } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
 
-/**
- * @param {*} data - What is the data?
- *
- * @author Name
- *
- * @since Date
- */
+const makeDeptCountPlot = (data) => {
+  /**
+  * @param {*} data - What is the data?
+  *
+  * @author Name
+  *
+  * @since Date
+  */
 
-const makeSinglePlot = (div, data, title, color) => {
+  const container = select('#rate-my-prof-dept-count-plot').attr('class', 'rate-my-prof');
   const size = {
     height: 400,
     width: Math.min(600, window.innerWidth - 40),
@@ -24,17 +25,16 @@ const makeSinglePlot = (div, data, title, color) => {
 
   const margin = {
     top: 10,
-    right: 20,
-    bottom: 40,
+    right: 0,
+    bottom: 35,
     left: 140,
   };
-
-  const svg = div
+  const svg = container
     .append('svg')
     .attr('height', size.height)
     .attr('width', size.width);
 
-  div
+  container
     .append('a')
     .text('Source: RateMyProfessor.com')
     .attr('href', '');
@@ -42,21 +42,18 @@ const makeSinglePlot = (div, data, title, color) => {
   /*
     Create Scales:
   */
-
+  const countsArray = data.map((d) => parseFloat(d.count));
   const x = scaleLinear()
-    .domain([0, 5])
+    .domain([0, Math.max(...countsArray)])
     .range([margin.left, size.width - margin.right]);
-  console.log([1, 2, 3].reverse());
+
+  const depts = data.map((d) => d.Dept);
+
   const y = scaleBand()
+    .domain(depts.reverse())
     .range([size.height - margin.bottom, margin.top])
     .padding(0.1);
-  if (title === 'Most Positively Reviewed Departments') {
-    const depts = data.map((d) => d.Dept);
-    y.domain(depts.reverse());
-  }
-  else {
-    y.domain(data.map((d) => d.Dept));
-  }
+
   /*
     Start Plot:
   */
@@ -72,13 +69,13 @@ const makeSinglePlot = (div, data, title, color) => {
     .attr('height', y.bandwidth())
     .attr('x', margin.left)
     .attr('y', (d) => y(d.Dept))
-    .style('fill', color);
+    .style('fill', '#f28e2c');
 
   svg.selectAll('rect')
     .transition()
     .duration(800)
     .attr('x', margin.left)
-    .attr('width', (d) => x(d.quality) - x(0))
+    .attr('width', (d) => x(d.count) - x(0))
     .delay((d, i) => i * 100);
 
   const xAxis = svg
@@ -93,31 +90,19 @@ const makeSinglePlot = (div, data, title, color) => {
     .attr('color', 'black')
     .call(axisLeft(y));
 
+  const yLabel = svg.append('text')
+    .attr('x', (size.height - (margin.bottom + margin.top) / 2))
+    .attr('text-anchor', 'end')
+    .attr('dy', '.75em')
+    .attr('transform', 'rotate(-90)')
+    .text('Department')
+    .attr('fill', '#adadad');
+
   const xLabel = svg.append('text')
-    .attr('x', x(2.5))
+    .attr('x', (size.width + margin.left - (margin.left)) / 2)
     .attr('y', size.height - margin.bottom + 30)
     .style('font-size', '12px')
-    .style('text-anchor', 'middle')
-    .text('Average Rating');
+    .text('Number of Reviews');
 };
 
-const makePositiveChart = (data) => {
-  /*
-    Container Setup:
-  */
-  const posData = data.slice(0, 5);
-  const negData = data.slice(Math.max(data.length - 5, 1));
-  // The class is necessary to apply styling
-  const container = select('#rate-my-prof-positive-dept-plot').attr('class', 'rate-my-prof');
-
-  // When the resize event is called, reset the plot
-  container.selectAll('*').remove();
-
-  container.append('h1').text('Best and Worst Departments by Average Quality');
-  const posDiv = container.append('div');
-  const negDiv = container.append('div');
-  makeSinglePlot(posDiv, posData, 'Most Positively Reviewed Departments', '#68ffbe');
-  makeSinglePlot(negDiv, negData, 'Most Negatively Reviewed Departments', 'ff9c9c');
-};
-
-export default makePositiveChart;
+export default makeDeptCountPlot;
