@@ -29,6 +29,7 @@ const makeDeptCountPlot = (data) => {
     bottom: 35,
     left: 140,
   };
+  container.append('h1').text('Most Reviewed UCSB Departments');
   const svg = container
     .append('svg')
     .attr('height', size.height)

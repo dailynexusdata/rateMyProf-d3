@@ -49,6 +49,10 @@ const makeYearLineChart = (data) => {
   /*
       Create Scales:
     */
+  div
+    .append('a')
+    .text('Source: RateMyProfessor.com')
+    .attr('href', '');
   const x = scaleLinear()
     .domain([2000, 2023])
     .range([margin.left, size.width - margin.right]);
